@@ -49,7 +49,8 @@ async function fetchCountries(){
       id: country.numericCode,
       name: country.translations.pt,
       population: country.population,
-      flag: country.flag
+      flag: country.flag,
+      formatPopulation: formatNumber(country.population)
     }
   });
   render();
@@ -65,8 +66,14 @@ function render(){
 function renderCountryList(){
   let countriesHTML = "<div>";
   allCountries.forEach(country => {
+
+    //Ordenando os elementos.
+    allCountries.sort((a,b) => {
+      return a.name.localeCompare(b.name);
+    });
+
     //Aplicando Destructing.
-    const {name, flag, id, population} = country;
+    const {name, flag, id, formatPopulation} = country;
 
     //Montando elementos na tela.
     const countryHtml = `
@@ -82,7 +89,7 @@ function renderCountryList(){
         <div>
           <ul>
             <li>${name}</li>
-            <li>${population}</li>
+            <li>${formatPopulation}</li>
         </div>
       </div>
     `;
@@ -96,7 +103,7 @@ function renderFavorites(){
 
   favoriteCountries.forEach(country => {
     //Aplicando Destructing.
-    const {name, flag, id, population} = country;
+    const {name, flag, id, formatPopulation} = country;
 
     //Montando elementos na tela.
     const favoriteCountryHtml = `
@@ -112,7 +119,7 @@ function renderFavorites(){
         <div>
           <ul>
             <li>${name}</li>
-            <li>${population}</li>
+            <li>${formatPopulation}</li>
         </div>
       </div>
     `;
@@ -130,14 +137,67 @@ function renderSummary(){
     return accumulator + country.population;
   }, 0);
 
-  const totalPopulationFavorite = allCountries.reduce((accumulatorFavorite, country) => {
+  const totalPopulationFavorite = favoriteCountries.reduce((accumulatorFavorite, country) => {
     return accumulatorFavorite += country.population;
   }, 0);
 
-  totalPopulationFavoriteList = totalPopulationFavorite;
-  totalPopulationList.textContent = totalPopulation;
+  totalPopulationList.textContent = formatNumber(totalPopulation);
+  totalPopulationFavoriteList.textContent = formatNumber(totalPopulationFavorite);
 }
 
 function handleCountryButtons(){
-  console.log('handleCountryButtons');
+  //Retorna uma NodeList, mas é preciso conter para um array.
+  let countryButtons = tabCountries.querySelectorAll('.btn');
+  //Convertendo para array.
+  countryButtons = Array.from(tabCountries.querySelectorAll('.btn'));
+
+  //Pegando tambem os botoes da FavoriteList e ja convertendo direto em Array.
+  const countryFavoriteButtons = Array.from(tabFavorites.querySelectorAll('.btn'));
+
+  //Add eventListener a cada um dos botoes da lista geral.
+  countryButtons.forEach(btns => {
+    btns.addEventListener('click', () => {
+      addToFavorites(btns.id);
+    });
+  });
+  
+  //Add eventListener a cada um dos botoes da lista de favoritos.
+  countryFavoriteButtons.forEach(btns => {
+    btns.addEventListener('click', () => {
+      removeFromFavorite(btns.id);
+    });
+  });
+}
+
+function addToFavorites(id){
+  const countryToAdd = allCountries.find(country => country.id === id);
+
+  //Realizando um spread para atribuir um valor no array. Com o spread, ele espalha os elementos que o array possui e reatribui o novo.
+  favoriteCountries = [...favoriteCountries, countryToAdd];
+  
+  //Utilizando o Sort para ordenar os países na lista. Quando for String, pode-se utilizar a função LocaleCompare, informando pelo qual dado sera a comparação.
+  favoriteCountries.sort((a,b) => {
+    return a.name.localeCompare(b.name);
+  });
+  
+  allCountries = allCountries.filter(country => country.id !== id);
+  
+  render();
+}
+
+function removeFromFavorite(id){
+  const countryToRemove = favoriteCountries.find(country => country.id === id);
+  allCountries = [...allCountries, countryToRemove];
+
+  allCountries.sort((a,b) => {
+    return a.name.localeCompare(b.name);
+  });
+
+  favoriteCountries = favoriteCountries.filter(country => country.id !== id);
+
+  render();
+}
+
+function formatNumber(number){
+  return numberFormat.format(number);
 }
