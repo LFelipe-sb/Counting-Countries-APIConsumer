@@ -102,7 +102,7 @@ function renderFavorites(){
     const favoriteCountryHtml = `
       <div class='country'>
         <div>
-          <a id='${id}' class='waves-effect waves-light btn red darken-4'> + </a>
+          <a id='${id}' class='waves-effect waves-light btn red darken-4'> - </a>
         </div>
           
         <div>
@@ -122,7 +122,20 @@ function renderFavorites(){
 }
 
 function renderSummary(){
-  console.log('renderSummary');
+  countCountries.textContent = allCountries.length;
+  countFavoriteCountries.textContent = favoriteCountries.length;
+
+  //Reduce faz interação com cada elemento, espera receber uma variavel e o obj da iteração. Tambem é necessario informa o valor inicial da variavel.
+  const totalPopulation = allCountries.reduce((accumulator, country) => {
+    return accumulator + country.population;
+  }, 0);
+
+  const totalPopulationFavorite = allCountries.reduce((accumulatorFavorite, country) => {
+    return accumulatorFavorite += country.population;
+  }, 0);
+
+  totalPopulationFavoriteList = totalPopulationFavorite;
+  totalPopulationList.textContent = totalPopulation;
 }
 
 function handleCountryButtons(){
